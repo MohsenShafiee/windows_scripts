@@ -1,6 +1,19 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Ignore
 
+if !A_IsAdmin {
+    try {
+        Run(Format("*RunAs `"{1}`" /restart `"{2}`"", A_AhkPath, A_ScriptFullPath))
+    } catch {
+        MsgBox "برای Max/Restore کردن پنجره‌های ادمین، اسکریپت باید با دسترسی Administrator اجرا شود."
+    }
+    ExitApp
+}
+
+SetWinDelay(-1)
+SetControlDelay(-1)
+SetMouseDelay(-1)
+
 TrayTip "AutoHotkey", "Max/Restore is running - Ctrl + Middle Click", 3
 
 global SavedWindows := Map()
@@ -19,6 +32,7 @@ ToggleMaxRestoreUnderMouse() {
     if !hwnd
         return
 
+    hwnd := GetRootWindow(hwnd)
     win := "ahk_id " hwnd
 
     if !IsRealWindow(hwnd)
@@ -98,6 +112,11 @@ BringWindowToFront(hwnd) {
         }
     } catch {
     }
+}
+
+GetRootWindow(hwnd) {
+    root := DllCall("GetAncestor", "ptr", hwnd, "uint", 2, "ptr") ; GA_ROOT
+    return root ? root : hwnd
 }
 
 IsRealWindow(hwnd) {
