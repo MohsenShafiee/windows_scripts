@@ -1,5 +1,16 @@
 #Requires AutoHotkey v2.0
-#SingleInstance Ignore
+#SingleInstance Force
+
+; An elevated terminal rejects synthetic input from a non-elevated process
+; (UIPI). Relaunch this helper elevated so it works in Administrator shells.
+if !A_IsAdmin {
+    try {
+        Run(Format("*RunAs `"{1}`" /restart `"{2}`"", A_AhkPath, A_ScriptFullPath))
+    } catch {
+        MsgBox "برای Paste در ترمینال Administrator، اسکریپت باید با دسترسی Administrator اجرا شود."
+    }
+    ExitApp
+}
 
 ; Middle Click:
 ; - Text fields: focus + paste
