@@ -9,7 +9,7 @@ SetTitleMatchMode 2
 DELETE_MODE := "recycle"
 
 SEARCH_ROOTS := [
-    "D:\Musics"
+    "D:\"
 ]
 
 ; Shortcut:

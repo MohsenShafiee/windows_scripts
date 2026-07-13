@@ -1,12 +1,14 @@
 ﻿#Requires AutoHotkey v2.0
-#SingleInstance Ignore
+#SingleInstance Force
 DetectHiddenWindows true
 SetTitleMatchMode 2
 
-DEST_DIR := "D:\Musics\Selection"
+DEST_DIR := "D:\Data\Musics\Selection"
 
 SEARCH_ROOTS := [
-    "D:\Musics"
+    ; Check the music library first; D:\ is kept as a fallback.
+    "D:\Data\Musics",
+    "D:\"
 ]
 
 ; Shortcut:
@@ -41,6 +43,12 @@ MoveCurrentPotPlayerFileByTitle() {
         return
     }
 
+    sourceSize := GetUsableFileSize(src)
+    if sourceSize <= 0 {
+        Notify("The playing file is no longer available:`n" fileName, false)
+        return
+    }
+
     SplitPath src, &realFileName, &srcDir, &ext, &nameNoExt
 
     destPath := DEST_DIR . "\" . realFileName
@@ -51,19 +59,62 @@ MoveCurrentPotPlayerFileByTitle() {
         return
     }
 
-    try {
-        FileMove src, destPath, false
+    ; PotPlayer can keep the current file open. Advance first, then retry the
+    ; move briefly while it releases the old file handle.
+    PlayNextInPotPlayer(pot)
 
-        if FileExist(destPath) && !FileExist(src) {
-            Notify("Moved successfully:`n" realFileName, true)
-        } else if FileExist(destPath) {
-            Notify("Moved, but source check failed:`n" realFileName, true)
-        } else {
-            Notify("Move failed.", false)
+    if MoveFileWithRetry(src, destPath, sourceSize)
+        Notify("Moved successfully:`n" realFileName, true)
+    else if FileExist(destPath)
+        Notify("Move verification failed; destination size is incorrect:`n" realFileName, false)
+    else
+        Notify("Could not move the playing file:`n" realFileName, false)
+}
+
+GetUsableFileSize(path) {
+    try {
+        return FileGetSize(path, "B")
+    }
+    catch {
+        return 0
+    }
+}
+
+MoveFileWithRetry(src, destPath, sourceSize) {
+    Loop 6 {
+        try {
+            FileMove src, destPath, false
+
+            try {
+                movedSize := FileGetSize(destPath, "B")
+            }
+            catch {
+                movedSize := 0
+            }
+
+            return FileExist(destPath) && !FileExist(src) && movedSize = sourceSize
+        }
+        catch {
+            ; PotPlayer may still be closing the old file.
+            Sleep 300
         }
     }
-    catch as e {
-        Notify("Move error:`n" e.Message, false)
+
+    return false
+}
+
+PlayNextInPotPlayer(pot) {
+    oldWin := WinExist("A")
+
+    try {
+        WinActivate "ahk_id " pot
+        WinWaitActive "ahk_id " pot, , 0.8
+        Send "{PgDn}"
+        Sleep 250
+    }
+    finally {
+        if oldWin && WinExist("ahk_id " oldWin)
+            WinActivate "ahk_id " oldWin
     }
 }
 
@@ -179,19 +230,23 @@ FindFileInRoots(fileName, roots, destDir) {
 
             if hasExt {
                 if StrLower(loopName) = wanted
-                    return full
+                    if IsUsableCandidate(full)
+                        return full
 
                 if NormalizeFileName(loopName) = wantedNorm
-                    return full
+                    if IsUsableCandidate(full)
+                        return full
             } else {
                 SplitPath loopName, , , &loopExt, &loopNameNoExt
 
                 if IsSupportedExt(loopExt) {
                     if StrLower(loopNameNoExt) = wanted
-                        return full
+                        if IsUsableCandidate(full)
+                            return full
 
                     if NormalizeFileName(loopNameNoExt) = wantedNorm
-                        return full
+                        if IsUsableCandidate(full)
+                            return full
                 }
             }
         }
@@ -225,6 +280,15 @@ IsUnderFolder(filePath, folderPath) {
     folderLower := StrLower(folderPath)
 
     return SubStr(fileLower, 1, StrLen(folderLower)) = folderLower
+}
+
+IsUsableCandidate(filePath) {
+    ; A deleted zero-byte placeholder with the same name can exist in
+    ; $RECYCLE.BIN and otherwise wins the recursive search.
+    if InStr(StrLower(filePath), "\$recycle.bin\") > 0
+        return false
+
+    return GetUsableFileSize(filePath) > 0
 }
 
 Notify(message, success := true) {
