@@ -1,3 +1,6 @@
 desktop.ini
-msh-startup.lock
-msh-startup.log
+**/msh-startup.lock
+**/msh-startup.log
+apps/swap-monitors/logs/*
+!apps/swap-monitors/logs/.gitkeep
+apps/swap-monitors/config/config.ini.backup-*

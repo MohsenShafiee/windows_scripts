@@ -28,5 +28,5 @@
 
 این بکاپ برای همین حساب ویندوز و مسیرهای فعلی ساخته شده است، از جمله:
 
-- `D:\Github\msh_apps\windows_scripts`
+- `D:\Github\msh_apps\windows_scripts\apps\space-workspace\runtime`
 - دو مانیتور 1920×1080 با چیدمان ثبت‌شده

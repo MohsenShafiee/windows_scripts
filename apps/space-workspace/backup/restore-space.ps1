@@ -15,7 +15,7 @@ if (-not $isAdministrator)
 $packageRoot = Split-Path -Parent $PSCommandPath
 $workspaceDir = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\Workspaces'
 $terminalDir = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState'
-$scriptDir = 'D:\Github\msh_apps\windows_scripts'
+$scriptDir = 'D:\Github\msh_apps\windows_scripts\apps\space-workspace\runtime'
 $startupDir = [Environment]::GetFolderPath('Startup')
 $stamp = [DateTime]::Now.ToString('yyyyMMdd-HHmmss', [Globalization.CultureInfo]::InvariantCulture)
 $safetyDir = Join-Path $workspaceDir "Backups\restore-safety-$stamp"

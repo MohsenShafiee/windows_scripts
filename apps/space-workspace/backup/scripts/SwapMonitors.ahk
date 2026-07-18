@@ -32,13 +32,12 @@ global FadeSteps := 5
 global FadeDelay := 20
 global FadeMinAlpha := 185
 global HoldAfterMove := 40
-global PendingRestore := ""
 global SwapBusy := false
 
 ; Ctrl + Shift + Middle Mouse Button
-^+MButton::ApplyExactStartupSwapLayout()
+^+MButton::ResetDefaultWorkspaceThenSwap(1, 2)
 
-ApplyExactStartupSwapLayout() {
+ResetDefaultWorkspaceThenSwap(monA := 1, monB := 2) {
     global SwapBusy
 
     if SwapBusy
@@ -47,25 +46,31 @@ ApplyExactStartupSwapLayout() {
     SwapBusy := true
 
     try {
-        ; موقعیت نهاییِ دقیقِ «چیدمان Startup، سپس Swap».
-        ; اجرای مستقیم در AHK هم فوری است و هم خطای Work Area / Scaling ندارد.
-        rules := [
-            { process: "chrome.exe",          title: "",                                      class: "",              all: true,  x: -2,   y: 5,   w: 1413, h: 1029 },
-            { process: "Telegram.exe",        title: "",                                      class: "",              all: true,  x: 1401, y: 5,   w: 521,  h: 846  },
-            { process: "PotPlayerMini64.exe", title: "",                                      class: "",              all: true,  x: 1408, y: 848, w: 507,  h: 179  },
-            { process: "explorer.exe",        title: "",                                      class: "CabinetWClass", all: true,  x: 1918, y: 5,   w: 1425, h: 413  },
-            { process: "ChatGPT Classic.exe", title: "ChatGPT Classic",                       class: "",              all: false, x: 1918, y: 415, w: 552,  h: 619  },
-            { process: "ChatGPT.exe",         title: "ChatGPT",                               class: "",              all: false, x: 2467, y: 415, w: 869,  h: 612  },
-            { process: "cmd.exe",             title: "Administrator: Windows Command Center", class: "",              all: false, x: 3333, y: 5,   w: 509,  h: 498  },
-            { process: "WindowsTerminal.exe", title: "Administrator: PowerShell",             class: "",              all: false, x: 3333, y: 500, w: 509,  h: 534  }
-        ]
-
-        windows := WinGetList()
-        for rule in rules
-            MoveMatchingWindows(windows, rule)
+        ; ابتدا workspace پیش‌فرض را برگردان و بعد همهٔ پنجره‌ها را، به‌جز
+        ; Desktop و Taskbar، بین دو مانیتور جابه‌جا کن.
+        ApplyDefaultWorkspaceLayout()
+        Sleep 50
+        SwapWindowsBetweenMonitors(monA, monB)
     } finally {
         SwapBusy := false
     }
+}
+
+ApplyDefaultWorkspaceLayout() {
+    rules := [
+        { process: "explorer.exe",        title: "",                                      class: "CabinetWClass", all: true,  x: -2,   y: 5,   w: 1425, h: 413  },
+        { process: "ChatGPT Classic.exe", title: "ChatGPT Classic",                       class: "",              all: false, x: -2,   y: 415, w: 552,  h: 619  },
+        { process: "ChatGPT.exe",         title: "ChatGPT",                               class: "",              all: false, x: 547,  y: 415, w: 869,  h: 612  },
+        { process: "cmd.exe",             title: "Administrator: Windows Command Center", class: "",              all: false, x: 1413, y: 5,   w: 509,  h: 498  },
+        { process: "WindowsTerminal.exe", title: "Administrator: PowerShell",             class: "",              all: false, x: 1413, y: 500, w: 509,  h: 534  },
+        { process: "chrome.exe",          title: "",                                      class: "",              all: true,  x: 1918, y: 5,   w: 1413, h: 1029 },
+        { process: "Telegram.exe",        title: "",                                      class: "",              all: true,  x: 3321, y: 5,   w: 521,  h: 846  },
+        { process: "PotPlayerMini64.exe", title: "",                                      class: "",              all: true,  x: 3328, y: 848, w: 507,  h: 179  }
+    ]
+
+    windows := WinGetList()
+    for rule in rules
+        MoveMatchingWindows(windows, rule)
 }
 
 MoveMatchingWindows(windows, rule) {
@@ -132,8 +137,6 @@ MoveWindowExact(hwnd, x, y, w, h) {
 }
 
 SwapWindowsBetweenMonitors(monA := 1, monB := 2) {
-    global PendingRestore
-
     if (MonitorGetCount() < 2) {
         MsgBox "حداقل دو مانیتور لازم است."
         return
@@ -147,18 +150,7 @@ SwapWindowsBetweenMonitors(monA := 1, monB := 2) {
     bW := bR - bL
     bH := bB - bT
 
-    if IsObject(PendingRestore) {
-        restoreMoves := FilterExistingMoves(PendingRestore)
-        PendingRestore := ""
-
-        if (restoreMoves.Length > 0) {
-            ApplyMoves(restoreMoves)
-            return
-        }
-    }
-
     moves := []
-    restoreMoves := []
 
     for hwnd in WinGetList() {
         if !IsRealWindow(hwnd)
@@ -173,8 +165,7 @@ SwapWindowsBetweenMonitors(monA := 1, monB := 2) {
         if (state = -1)
             continue
 
-        try WinGetPos(&x, &y, &w, &h, win)
-        catch
+        if !GetWindowRectExact(hwnd, &x, &y, &w, &h)
             continue
 
         if (w <= 0 || h <= 0)
@@ -189,20 +180,12 @@ SwapWindowsBetweenMonitors(monA := 1, monB := 2) {
             targetT := bT
             targetR := bR
             targetB := bB
-            restoreL := aL
-            restoreT := aT
-            restoreR := aR
-            restoreB := aB
         } else if PointInRect(cx, cy, bL, bT, bR, bB) {
             dest := CalculateDestination(x, y, w, h, bL, bT, bW, bH, aL, aT, aW, aH)
             targetL := aL
             targetT := aT
             targetR := aR
             targetB := aB
-            restoreL := bL
-            restoreT := bT
-            restoreR := bR
-            restoreB := bB
         } else {
             continue
         }
@@ -220,47 +203,12 @@ SwapWindowsBetweenMonitors(monA := 1, monB := 2) {
             dB: targetB
         })
 
-        restoreMoves.Push({
-            hwnd: hwnd,
-            state: state,
-            x: x,
-            y: y,
-            w: w,
-            h: h,
-            dL: restoreL,
-            dT: restoreT,
-            dR: restoreR,
-            dB: restoreB
-        })
     }
 
     if (moves.Length = 0)
         return
 
-    PendingRestore := restoreMoves
     ApplyMoves(moves)
-}
-
-FilterExistingMoves(moves) {
-    activeMoves := []
-
-    for item in moves {
-        win := "ahk_id " item.hwnd
-
-        if !WinExist(win)
-            continue
-
-        try state := WinGetMinMax(win)
-        catch
-            continue
-
-        if (state = -1)
-            continue
-
-        activeMoves.Push(item)
-    }
-
-    return activeMoves
 }
 
 ApplyMoves(moves) {
@@ -309,8 +257,7 @@ ApplyMoves(moves) {
 MoveWindowAndKeepInBounds(item) {
     win := "ahk_id " item.hwnd
 
-    try WinMove(item.x, item.y, item.w, item.h, win)
-    catch
+    if !SetWindowRectExact(item.hwnd, item.x, item.y, item.w, item.h)
         return
 
     try {
@@ -325,8 +272,7 @@ MoveWindowAndKeepInBounds(item) {
     ; بعضی پنجره‌ها حداقل اندازه اجباری دارند؛ بعد از Move اندازه واقعی را clamp کن.
     Sleep 10
 
-    try WinGetPos(&x, &y, &w, &h, win)
-    catch
+    if !GetWindowRectExact(item.hwnd, &x, &y, &w, &h)
         return
 
     dW := dR - dL
@@ -336,21 +282,53 @@ MoveWindowAndKeepInBounds(item) {
     nx := x
     ny := y
 
-    if (nx < dL)
-        nx := dL
-    if (nx + nw > dR)
-        nx := dR - nw
-    if (ny < dT)
-        ny := dT
-    if (ny + nh > dB)
-        ny := dB - nh
+    ; Windows keeps a small invisible resize border outside the work area.
+    ; Preserve it so a round trip returns to the exact original rectangle.
+    borderSlack := 16
 
-    nx := Max(dL, nx)
-    ny := Max(dT, ny)
+    if (nx < dL - borderSlack)
+        nx := dL - borderSlack
+    if (nx + nw > dR + borderSlack)
+        nx := dR + borderSlack - nw
+    if (ny < dT - borderSlack)
+        ny := dT - borderSlack
+    if (ny + nh > dB + borderSlack)
+        ny := dB + borderSlack - nh
+
+    nx := Max(dL - borderSlack, nx)
+    ny := Max(dT - borderSlack, ny)
 
     if (nx != x || ny != y || nw != w || nh != h) {
-        try WinMove(nx, ny, nw, nh, win)
+        SetWindowRectExact(item.hwnd, nx, ny, nw, nh)
     }
+}
+
+GetWindowRectExact(hwnd, &x, &y, &w, &h) {
+    rect := Buffer(16, 0)
+
+    if !DllCall("GetWindowRect", "ptr", hwnd, "ptr", rect, "int")
+        return false
+
+    x := NumGet(rect, 0, "int")
+    y := NumGet(rect, 4, "int")
+    w := NumGet(rect, 8, "int") - x
+    h := NumGet(rect, 12, "int") - y
+    return (w > 0 && h > 0)
+}
+
+SetWindowRectExact(hwnd, x, y, w, h) {
+    ; SWP_NOZORDER | SWP_NOACTIVATE
+    return DllCall(
+        "SetWindowPos",
+        "ptr", hwnd,
+        "ptr", 0,
+        "int", x,
+        "int", y,
+        "int", w,
+        "int", h,
+        "uint", 0x0014,
+        "int"
+    )
 }
 
 FadeWindowsOut(moves) {
@@ -389,6 +367,17 @@ FadeWindowsIn(moves) {
 }
 
 CalculateDestination(x, y, w, h, sL, sT, sW, sH, dL, dT, dW, dH) {
+    ; Equal-sized monitors need only a translation. Avoid scaling/clamping so
+    ; invisible resize borders and exact window sizes survive a round trip.
+    if (sW = dW && sH = dH) {
+        return {
+            x: x + dL - sL,
+            y: y + dT - sT,
+            w: w,
+            h: h
+        }
+    }
+
     nx := dL + Round((x - sL) * dW / sW)
     ny := dT + Round((y - sT) * dH / sH)
     nw := Max(200, Round(w * dW / sW))
