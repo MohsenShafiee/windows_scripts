@@ -7,9 +7,14 @@ class Logger {
         this.level := StrUpper(level)
         this.levels := Map("DEBUG", 10, "INFO", 20, "WARN", 30, "ERROR", 40)
         if enabled {
-            DirCreate(logDir)
             this.path := logDir "\swap-" SubStr(Win32.Timestamp(), 1, 10) ".log"
-            this.Rotate()
+            try {
+                DirCreate(logDir)
+                this.Rotate()
+            } catch as err {
+                this.enabled := false
+                OutputDebug("SwapMonitors logger initialization failed: " err.Message)
+            }
         } else {
             this.path := ""
         }
@@ -23,8 +28,16 @@ class Logger {
         if this.levels[level] < threshold
             return
         safe := StrReplace(StrReplace(message, "`r", " "), "`n", " ")
-        FileAppend(Format("{1}Z [{2}] [{3}] {4}`n", Win32.Timestamp(true),
-            level, operationId, safe), this.path, "UTF-8")
+        try {
+            ; The folder can disappear while the resident script is running (for example after a sync).
+            if !DirExist(this.logDir)
+                DirCreate(this.logDir)
+            FileAppend(Format("{1}Z [{2}] [{3}] {4}`n", Win32.Timestamp(true),
+                level, operationId, safe), this.path, "UTF-8")
+        } catch as err {
+            ; Logging must never abort an otherwise successful monitor swap.
+            OutputDebug("SwapMonitors log write failed: " err.Message)
+        }
     }
 
     Debug(message, operationId := "-") => this.Write("DEBUG", message, operationId)

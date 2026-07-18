@@ -7,6 +7,7 @@
 #Include "MonitorService.ahk"
 #Include "WindowService.ahk"
 #Include "SwapService.ahk"
+#Include "AnimationService.ahk"
 #Include "DiagnosticService.ahk"
 #Include "AppController.ahk"
 

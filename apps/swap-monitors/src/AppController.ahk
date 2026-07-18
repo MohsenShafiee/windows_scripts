@@ -16,6 +16,7 @@ class AppController {
         this.monitorService := MonitorService(this.config, this.logger)
         this.windowService := WindowService(this.config, this.logger, this.monitorService)
         this.swapService := SwapService(this.config, this.logger, this.windowService)
+        this.animation := AnimationService(this.config, this.logger)
         this.diagnostics := DiagnosticService(rootDir, this.config, this.logger,
             this.monitorService, this.windowService)
     }
@@ -130,6 +131,9 @@ class AppController {
             changed := true
             this.swapService.ApplyCurrentSwap(preSnapshot, monitorMap, operationId)
             this.monitorService.VerifyInvariants(invariants)
+            try this.animation.PlaySwap(monitorMap)
+            catch as animationError
+                this.logger.Warn("Swap animation failed: " animationError.Message, operationId)
             message := "Monitor contents swapped successfully."
             this.logger.Info(message " duration=" (A_TickCount - started) "ms", operationId)
             if this.config.GetBool("General", "ShowSuccessNotification", true)

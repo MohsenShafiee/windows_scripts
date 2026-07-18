@@ -2,10 +2,13 @@
 
 class Win32 {
     static ERROR_ALREADY_EXISTS := 183
+    static SWP_NOSIZE := 0x0001
     static SWP_NOZORDER := 0x0004
+    static SWP_NOREDRAW := 0x0008
     static SWP_NOACTIVATE := 0x0010
     static SWP_NOOWNERZORDER := 0x0200
     static SWP_NOSENDCHANGING := 0x0400
+    static SWP_DEFERERASE := 0x2000
     static SWP_FRAMECHANGED := 0x0020
 
     static EnablePerMonitorDpiV2() {

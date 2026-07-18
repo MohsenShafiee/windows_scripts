@@ -208,6 +208,17 @@ class WindowService {
         if restoreFirst.Length
             Sleep(100)
 
+        if this.config.GetBool("General", "EnableWindowAnimation", true) {
+            animated := []
+            for item in movable {
+                ; Borderless fullscreen windows must stay locked to monitor bounds.
+                if !item.window.fullscreen
+                    animated.Push(item)
+            }
+            this.AnimateWindows(animated,
+                this.config.GetInt("General", "WindowAnimationDurationMs", 240))
+        }
+
         failures := 0
         if useAtomic && movable.Length > 0 {
             hdwp := DllCall("BeginDeferWindowPos", "Int", movable.Length, "Ptr")
@@ -301,6 +312,57 @@ class WindowService {
         return {moved: moved, failed: failures, skipped: skipped}
     }
 
+    AnimateWindows(items, duration) {
+        if items.Length = 0
+            return
+
+        duration := Max(120, Min(500, duration))
+        motions := []
+        for item in items {
+            try {
+                start := Win32.GetRect(item.window.hwnd)
+                motions.Push({item: item, start: start})
+            }
+        }
+        if motions.Length = 0
+            return
+
+        steps := Max(8, Round(duration / 16.67))
+        flags := Win32.SWP_NOSIZE | Win32.SWP_NOZORDER | Win32.SWP_NOREDRAW
+            | Win32.SWP_NOACTIVATE | Win32.SWP_NOOWNERZORDER
+            | Win32.SWP_NOSENDCHANGING | Win32.SWP_DEFERERASE
+        ; Leave the last frame to ApplyPlan so every app receives only one real
+        ; resize/repaint. Intermediate frames move DWM's cached surface only.
+        Loop steps - 1 {
+            progress := A_Index / steps
+            ; Smoothstep keeps the motion readable without feeling sluggish.
+            eased := progress * progress * (3 - (2 * progress))
+            hdwp := DllCall("BeginDeferWindowPos", "Int", motions.Length, "Ptr")
+            if !hdwp
+                break
+            for motion in motions {
+                target := motion.item.target
+                start := motion.start
+                x := Round(start.l + ((target.l - start.l) * eased))
+                y := Round(start.t + ((target.t - start.t) * eased))
+                next := DllCall("DeferWindowPos", "Ptr", hdwp,
+                    "Ptr", motion.item.window.hwnd, "Ptr", 0,
+                    "Int", x, "Int", y, "Int", 0, "Int", 0,
+                    "UInt", flags, "Ptr")
+                if !next {
+                    hdwp := 0
+                    break
+                }
+                hdwp := next
+            }
+            if !hdwp || !DllCall("EndDeferWindowPos", "Ptr", hdwp, "Int")
+                break
+            ; Synchronize with the compositor instead of relying on imprecise Sleep timing.
+            if DllCall("dwmapi\DwmFlush", "Int") != 0
+                Sleep(Round(duration / steps))
+        }
+    }
+
     VerifyPlan(plan, tolerance) {
         failures := []
         for item in plan {
@@ -311,15 +373,36 @@ class WindowService {
             try {
                 actual := (item.window.fullscreen || item.window.state = 0) ? Win32.GetRect(item.window.hwnd)
                     : Win32.GetPlacement(item.window.hwnd).normal
-                if !GeometryService.WithinTolerance(actual, item.target, tolerance)
-                    failures.Push(item.window.hwnd)
-            } catch {
+                if GeometryService.WithinTolerance(actual, item.target, tolerance)
+                    continue
+
+                ; Some applications apply their own minimum size, aspect ratio, or invisible
+                ; frame after accepting SetWindowPos. That is still a successful swap when the
+                ; window ended up on the requested monitor.
+                actualMonitor := this.monitorService.Owner(actual,
+                    {a: item.source, b: item.destination})
+                if actualMonitor.index = item.destination.index {
+                    this.logger.Warn("Window adjusted target geometry hwnd=" item.window.hwnd
+                        " process=" item.window.process
+                        " target=" item.target.l "," item.target.t "," item.target.w "x" item.target.h
+                        " actual=" actual.l "," actual.t "," actual.w "x" actual.h)
+                    continue
+                }
+                this.logger.Warn("Window remained on source monitor hwnd=" item.window.hwnd
+                    " process=" item.window.process
+                    " target=" item.target.l "," item.target.t "," item.target.w "x" item.target.h
+                    " actual=" actual.l "," actual.t "," actual.w "x" actual.h)
+                failures.Push(item.window.hwnd)
+            } catch as err {
+                this.logger.Warn("Window verification error hwnd=" item.window.hwnd
+                    " process=" item.window.process " error=" err.Message)
                 failures.Push(item.window.hwnd)
             }
         }
         if failures.Length
-            throw Error("Window geometry verification failed for " failures.Length " window(s)")
-        return true
+            this.logger.Warn("Window geometry verification incomplete for " failures.Length
+                " window(s); keeping successful moves")
+        return failures.Length = 0
     }
 
     RestoreSnapshot(snapshot) {
