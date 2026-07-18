@@ -1,0 +1,26 @@
+1405-04-27 13:39:35 Layout helper started. NoLaunch=True
+1405-04-27 13:39:42 All eight windows are present and stable in the expected rectangles.
+2026-07-18 13:41:53 Layout helper started. NoLaunch=False
+2026-07-18 13:42:29 All eight windows are present and stable in the expected rectangles.
+1405-04-27 13:44:06 Layout helper started. NoLaunch=True
+1405-04-27 13:44:13 All eight windows are present and stable in the expected rectangles.
+2026-07-18 13:48:03 Layout helper started. NoLaunch=False
+2026-07-18 13:48:06 Started elevated Terminal.
+2026-07-18 13:48:06 Started elevated Windows Command Center.
+2026-07-18 13:48:09 Closed duplicate non-admin window: PowerShell
+2026-07-18 13:48:10 Closed duplicate non-admin window: Windows Command Center
+2026-07-18 13:48:20 Closed duplicate non-admin window: PowerShell
+2026-07-18 13:49:22 Timed out before all eight windows were simultaneously stable.
+2026-07-18 13:56:24 Layout helper started. NoLaunch=False
+2026-07-18 13:56:24 Started elevated Terminal.
+2026-07-18 13:56:24 Started elevated Windows Command Center.
+2026-07-18 13:56:44 SetWindowPos failed for Telegram.
+2026-07-18 13:57:00 All eight windows are present and stable in the expected rectangles.
+2026-07-18 14:01:18 Layout helper started. NoLaunch=False
+2026-07-18 14:01:19 Started elevated Terminal.
+2026-07-18 14:01:20 Started elevated Windows Command Center.
+2026-07-18 14:01:55 All eight windows are present and stable in the expected rectangles.
+2026-07-18 14:10:24 Layout helper started. NoLaunch=False
+2026-07-18 14:10:26 Started elevated Terminal.
+2026-07-18 14:10:26 Started elevated Windows Command Center.
+2026-07-18 14:11:13 All eight windows are present and stable in the expected rectangles.
