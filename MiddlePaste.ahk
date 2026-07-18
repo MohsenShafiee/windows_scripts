@@ -17,6 +17,9 @@ if !A_IsAdmin {
 ; - Windows Terminal / PowerShell / CMD: focus + paste
 ; - Elsewhere: normal middle click
 
+; Modified middle-clicks belong to the other mouse shortcuts.  Without this
+; guard, Ctrl+Shift+Middle can be forwarded and trigger SwapMonitors twice.
+#HotIf !GetKeyState("Ctrl") && !GetKeyState("Shift") && !GetKeyState("Alt") && !GetKeyState("LWin") && !GetKeyState("RWin")
 $MButton::{
     MouseGetPos ,, &winId
     proc := ""
@@ -42,3 +45,4 @@ $MButton::{
         Send "{MButton}"
     }
 }
+#HotIf

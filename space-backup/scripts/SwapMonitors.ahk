@@ -36,7 +36,7 @@ global PendingRestore := ""
 global SwapBusy := false
 
 ; Ctrl + Shift + Middle Mouse Button
-^+MButton::SwapWindowsBetweenMonitors(1, 2)
+^+MButton::ApplyExactStartupSwapLayout()
 
 ApplyExactStartupSwapLayout() {
     global SwapBusy
@@ -173,7 +173,8 @@ SwapWindowsBetweenMonitors(monA := 1, monB := 2) {
         if (state = -1)
             continue
 
-        if !GetWindowRectExact(hwnd, &x, &y, &w, &h)
+        try WinGetPos(&x, &y, &w, &h, win)
+        catch
             continue
 
         if (w <= 0 || h <= 0)
@@ -308,7 +309,8 @@ ApplyMoves(moves) {
 MoveWindowAndKeepInBounds(item) {
     win := "ahk_id " item.hwnd
 
-    if !SetWindowRectExact(item.hwnd, item.x, item.y, item.w, item.h)
+    try WinMove(item.x, item.y, item.w, item.h, win)
+    catch
         return
 
     try {
@@ -323,7 +325,8 @@ MoveWindowAndKeepInBounds(item) {
     ; بعضی پنجره‌ها حداقل اندازه اجباری دارند؛ بعد از Move اندازه واقعی را clamp کن.
     Sleep 10
 
-    if !GetWindowRectExact(item.hwnd, &x, &y, &w, &h)
+    try WinGetPos(&x, &y, &w, &h, win)
+    catch
         return
 
     dW := dR - dL
@@ -333,53 +336,21 @@ MoveWindowAndKeepInBounds(item) {
     nx := x
     ny := y
 
-    ; Windows keeps a small invisible resize border outside the work area.
-    ; Preserve it so a round trip returns to the exact original rectangle.
-    borderSlack := 16
+    if (nx < dL)
+        nx := dL
+    if (nx + nw > dR)
+        nx := dR - nw
+    if (ny < dT)
+        ny := dT
+    if (ny + nh > dB)
+        ny := dB - nh
 
-    if (nx < dL - borderSlack)
-        nx := dL - borderSlack
-    if (nx + nw > dR + borderSlack)
-        nx := dR + borderSlack - nw
-    if (ny < dT - borderSlack)
-        ny := dT - borderSlack
-    if (ny + nh > dB + borderSlack)
-        ny := dB + borderSlack - nh
-
-    nx := Max(dL - borderSlack, nx)
-    ny := Max(dT - borderSlack, ny)
+    nx := Max(dL, nx)
+    ny := Max(dT, ny)
 
     if (nx != x || ny != y || nw != w || nh != h) {
-        SetWindowRectExact(item.hwnd, nx, ny, nw, nh)
+        try WinMove(nx, ny, nw, nh, win)
     }
-}
-
-GetWindowRectExact(hwnd, &x, &y, &w, &h) {
-    rect := Buffer(16, 0)
-
-    if !DllCall("GetWindowRect", "ptr", hwnd, "ptr", rect, "int")
-        return false
-
-    x := NumGet(rect, 0, "int")
-    y := NumGet(rect, 4, "int")
-    w := NumGet(rect, 8, "int") - x
-    h := NumGet(rect, 12, "int") - y
-    return (w > 0 && h > 0)
-}
-
-SetWindowRectExact(hwnd, x, y, w, h) {
-    ; SWP_NOZORDER | SWP_NOACTIVATE
-    return DllCall(
-        "SetWindowPos",
-        "ptr", hwnd,
-        "ptr", 0,
-        "int", x,
-        "int", y,
-        "int", w,
-        "int", h,
-        "uint", 0x0014,
-        "int"
-    )
 }
 
 FadeWindowsOut(moves) {
@@ -418,17 +389,6 @@ FadeWindowsIn(moves) {
 }
 
 CalculateDestination(x, y, w, h, sL, sT, sW, sH, dL, dT, dW, dH) {
-    ; Equal-sized monitors need only a translation. Avoid scaling/clamping so
-    ; invisible resize borders and exact window sizes survive a round trip.
-    if (sW = dW && sH = dH) {
-        return {
-            x: x + dL - sL,
-            y: y + dT - sT,
-            w: w,
-            h: h
-        }
-    }
-
     nx := dL + Round((x - sL) * dW / sW)
     ny := dT + Round((y - sT) * dH / sH)
     nw := Max(200, Round(w * dW / sW))
