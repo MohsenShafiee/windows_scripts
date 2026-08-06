@@ -34,3 +34,116 @@
 2026-07-18 17:18:45 All eight windows are present and stable in the expected rectangles.
 2026-07-18 17:18:56 Layout helper started. NoLaunch=True; ArrangeOnce=True
 2026-07-18 17:18:57 All eight windows are present and stable in the expected rectangles.
+2026-07-19 10:42:59 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-19 10:42:59 Started elevated Terminal.
+2026-07-19 10:42:59 Started elevated Windows Command Center.
+2026-07-19 10:43:35 All eight windows are present and stable in the expected rectangles.
+2026-07-20 12:17:53 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-20 12:17:53 Started elevated Terminal.
+2026-07-20 12:17:53 Started elevated Windows Command Center.
+2026-07-20 12:18:29 All eight windows are present and stable in the expected rectangles.
+2026-07-21 12:31:58 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-21 12:32:00 Started elevated Terminal.
+2026-07-21 12:32:00 Started elevated Windows Command Center.
+2026-07-21 12:33:16 Timed out before all eight windows were simultaneously stable.
+2026-07-21 21:41:26 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-21 21:41:26 Started elevated Terminal.
+2026-07-21 21:41:26 Started elevated Windows Command Center.
+2026-07-21 21:42:04 All eight windows are present and stable in the expected rectangles.
+2026-07-22 00:16:02 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-22 00:16:04 Started elevated Terminal.
+2026-07-22 00:16:04 Started elevated Windows Command Center.
+2026-07-22 00:17:19 Timed out before all eight windows were simultaneously stable.
+2026-07-22 12:05:32 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-22 12:05:32 Started elevated Terminal.
+2026-07-22 12:05:32 Started elevated Windows Command Center.
+2026-07-22 12:06:47 Timed out before all eight windows were simultaneously stable.
+2026-07-23 12:27:27 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-23 12:27:27 Started elevated Terminal.
+2026-07-23 12:27:27 Started elevated Windows Command Center.
+2026-07-23 12:28:42 Timed out before all eight windows were simultaneously stable.
+2026-07-24 03:31:45 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-24 03:31:45 Started elevated Terminal.
+2026-07-24 03:31:46 Started elevated Windows Command Center.
+2026-07-24 03:32:25 All eight windows are present and stable in the expected rectangles.
+2026-07-24 13:12:45 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-24 13:12:45 Started elevated Terminal.
+2026-07-24 13:12:46 Started elevated Windows Command Center.
+2026-07-24 13:14:01 Timed out before all eight windows were simultaneously stable.
+2026-07-25 11:25:48 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-25 11:25:49 Started elevated Terminal.
+2026-07-25 11:25:49 Started elevated Windows Command Center.
+2026-07-25 11:27:05 Timed out before all eight windows were simultaneously stable.
+2026-07-26 12:53:58 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-26 12:53:59 Started elevated Terminal.
+2026-07-26 12:53:59 Started elevated Windows Command Center.
+2026-07-26 12:54:34 All eight windows are present and stable in the expected rectangles.
+2026-07-26 14:14:08 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-26 14:14:10 Started elevated Terminal.
+2026-07-26 14:14:10 Started elevated Windows Command Center.
+2026-07-26 14:15:25 Timed out before all eight windows were simultaneously stable.
+2026-07-27 13:51:10 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-27 13:51:12 Started elevated Terminal.
+2026-07-27 13:51:12 Started elevated Windows Command Center.
+2026-07-27 13:52:11 All eight windows are present and stable in the expected rectangles.
+2026-07-28 03:09:08 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-28 03:09:10 Started elevated Terminal.
+2026-07-28 03:09:10 Started elevated Windows Command Center.
+2026-07-28 03:10:00 All eight windows are present and stable in the expected rectangles.
+2026-07-28 14:27:56 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-28 14:27:57 Started elevated Terminal.
+2026-07-28 14:27:57 Started elevated Windows Command Center.
+2026-07-28 14:28:32 All eight windows are present and stable in the expected rectangles.
+2026-07-29 14:02:27 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-29 14:02:28 Started elevated Terminal.
+2026-07-29 14:02:28 Started elevated Windows Command Center.
+2026-07-29 14:03:19 SetWindowPos failed for File Explorer.
+2026-07-29 14:03:44 Timed out before all eight windows were simultaneously stable.
+2026-07-29 22:28:40 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-29 22:28:40 Started elevated Terminal.
+2026-07-29 22:28:40 Started elevated Windows Command Center.
+2026-07-29 22:29:56 Timed out before all eight windows were simultaneously stable.
+2026-07-30 02:45:52 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-30 02:45:53 Started elevated Terminal.
+2026-07-30 02:45:53 Started elevated Windows Command Center.
+2026-07-30 02:46:30 All eight windows are present and stable in the expected rectangles.
+2026-07-30 15:19:24 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-30 15:19:25 Started elevated Terminal.
+2026-07-30 15:19:25 Started elevated Windows Command Center.
+2026-07-30 15:20:04 All eight windows are present and stable in the expected rectangles.
+2026-07-30 18:24:56 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-30 18:24:56 Started elevated Terminal.
+2026-07-30 18:24:56 Started elevated Windows Command Center.
+2026-07-30 18:26:11 Timed out before all eight windows were simultaneously stable.
+2026-07-31 02:24:51 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-07-31 02:24:51 Started elevated Terminal.
+2026-07-31 02:24:52 Started elevated Windows Command Center.
+2026-07-31 02:26:07 Timed out before all eight windows were simultaneously stable.
+2026-08-01 13:20:20 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-01 13:20:21 Started elevated Terminal.
+2026-08-01 13:20:21 Started elevated Windows Command Center.
+2026-08-01 13:21:37 Timed out before all eight windows were simultaneously stable.
+2026-08-02 10:37:11 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-02 10:37:12 Started elevated Terminal.
+2026-08-02 10:37:12 Started elevated Windows Command Center.
+2026-08-02 10:38:27 Timed out before all eight windows were simultaneously stable.
+2026-08-03 09:25:09 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-03 09:25:10 Started elevated Terminal.
+2026-08-03 09:25:10 Started elevated Windows Command Center.
+2026-08-03 09:26:25 Timed out before all eight windows were simultaneously stable.
+2026-08-04 11:19:22 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-04 11:19:23 Started elevated Terminal.
+2026-08-04 11:19:23 Started elevated Windows Command Center.
+2026-08-04 11:20:39 Timed out before all eight windows were simultaneously stable.
+2026-08-05 01:47:59 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-05 01:47:59 Started elevated Terminal.
+2026-08-05 01:47:59 Started elevated Windows Command Center.
+2026-08-05 01:49:15 Timed out before all eight windows were simultaneously stable.
+2026-08-05 14:02:42 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-05 14:02:43 Started elevated Terminal.
+2026-08-05 14:02:43 Started elevated Windows Command Center.
+2026-08-05 14:03:59 Timed out before all eight windows were simultaneously stable.
+2026-08-06 12:38:11 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-06 12:38:11 Started elevated Terminal.
+2026-08-06 12:38:11 Started elevated Windows Command Center.
+2026-08-06 12:39:27 Timed out before all eight windows were simultaneously stable.
