@@ -3,97 +3,42 @@
 DetectHiddenWindows true
 SetTitleMatchMode 2
 
-; Options:
-; "permanent" = delete permanently
-; "recycle"   = move to Recycle Bin
-DELETE_MODE := "recycle"
-
-SEARCH_ROOTS := [
-    "D:\"
-]
-
 ; Shortcut:
 ; Ctrl + Alt + D
 ^!d::{
-    DeleteCurrentPotPlayerFileByTitle()
+    DeleteCurrentPotPlayerFile()
 }
 
-DeleteCurrentPotPlayerFileByTitle() {
-    global DELETE_MODE, SEARCH_ROOTS
-
+DeleteCurrentPotPlayerFile() {
     pot := FindPotPlayer()
     if !pot {
         Notify("PotPlayer not found.", false)
         return
     }
 
-    title := WinGetTitle("ahk_id " pot)
-    fileName := ExtractFileNameFromPotTitle(title)
-
-    if !fileName {
-        Notify("Could not read the current file name from PotPlayer.", false)
-        return
-    }
-
-    src := FindFileInRoots(fileName, SEARCH_ROOTS)
-
-    if !src {
-        Notify("File not found:`n" fileName, false)
-        return
-    }
-
-    SplitPath src, &realFileName
-
-    ; Move PotPlayer to next item first, so the current file is released.
-    PlayNextInPotPlayer(pot)
-
-    ; Give PotPlayer a moment to release the old file.
-    Sleep 800
-
+    ; Delegate deletion to PotPlayer.  Its Shift+Delete command permanently
+    ; removes the playing item and advances the playlist itself, without a
+    ; title lookup or a recursive scan of D:\.
     try {
-        if DELETE_MODE = "permanent" {
-            FileDelete src
-
-            if !FileExist(src)
-                Notify("Deleted permanently:`n" realFileName, true)
-            else
-                Notify("Permanent delete failed:`n" realFileName, false)
-        }
-        else if DELETE_MODE = "recycle" {
-            FileRecycle src
-
-            if !FileExist(src)
-                Notify("Moved to Recycle Bin:`n" realFileName, true)
-            else
-                Notify("Recycle failed:`n" realFileName, false)
-        }
-        else {
-            Notify("Invalid DELETE_MODE:`n" DELETE_MODE, false)
-        }
+        SendPotPlayerPermanentDelete(pot)
     }
     catch as e {
         Notify("Delete error:`n" e.Message, false)
     }
 }
 
-PlayNextInPotPlayer(pot) {
+SendPotPlayerPermanentDelete(pot) {
     oldWin := WinExist("A")
 
-    try {
-        WinActivate "ahk_id " pot
-        WinWaitActive "ahk_id " pot, , 0.8
+    WinActivate "ahk_id " pot
+    if !WinWaitActive("ahk_id " pot, , 0.8)
+        throw Error("Could not activate PotPlayer.")
 
-        ; PotPlayer default shortcut for next item/file
-        Send "{PgDn}"
+    Send "+{Del}"
 
-        Sleep 180
-
-        if oldWin && WinExist("ahk_id " oldWin)
-            WinActivate "ahk_id " oldWin
-    }
-    catch {
-        ; If switching fails, deletion will still be attempted after Sleep.
-    }
+    ; PotPlayer handles both releasing the file and moving to the next item.
+    if oldWin && WinExist("ahk_id " oldWin)
+        WinActivate "ahk_id " oldWin
 }
 
 FindPotPlayer() {
