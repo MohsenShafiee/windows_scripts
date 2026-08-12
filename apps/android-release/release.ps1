@@ -190,8 +190,10 @@ function Set-AndroidVersion {
     )
 
     $text = [IO.File]::ReadAllText($BuildFile)
-    $codePattern = '(?m)^(?<prefix>[ \t]*versionCode(?:[ \t]*=[ \t]*|[ \t]+))(?<code>\d+)(?<suffix>[^\r\n]*)$'
-    $namePattern = '(?m)^(?<prefix>[ \t]*versionName(?:[ \t]*=[ \t]*|[ \t]+))(?<quote>["''])(?<name>[^"'']*)(?<close>["''])(?<suffix>[^\r\n]*)$'
+    # Do not anchor to `$`: in .NET multiline mode it stops before `\n`, but after
+    # the `\r` in CRLF files. The suffix already consumes the complete logical line.
+    $codePattern = '(?m)^(?<prefix>[ \t]*versionCode(?:[ \t]*=[ \t]*|[ \t]+))(?<code>\d+)(?<suffix>[^\r\n]*)'
+    $namePattern = '(?m)^(?<prefix>[ \t]*versionName(?:[ \t]*=[ \t]*|[ \t]+))(?<quote>["''])(?<name>[^"'']*)(?<close>["''])(?<suffix>[^\r\n]*)'
     $codeMatches = [regex]::Matches($text, $codePattern)
     $nameMatches = [regex]::Matches($text, $namePattern)
 
