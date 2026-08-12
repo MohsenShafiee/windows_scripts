@@ -4,6 +4,7 @@
 
 ```text
 apps/
+├── android-release/    ساخت و نسخه‌گذاری APK برای Flutter و Native Android
 ├── desktop-helpers/    ابزارهای عمومی دسکتاپ و ماوس
 ├── potplayer/          فرمان‌های اختصاصی PotPlayer
 ├── space-workspace/    اجرای خودکار و بکاپ Workspace با نام space
@@ -12,6 +13,7 @@ apps/
 
 ## مسیرهای اصلی
 
+- [Android & Flutter Release](apps/android-release/README.md): فرمان سراسری `release`، نصب مجدد، نسخه‌گذاری، ساخت APK، commit و tag.
 - [SwapMonitors](apps/swap-monitors/README.md): برنامهٔ ماژولار AutoHotkey، تنظیمات، تست‌ها و ابزارهای تشخیصی.
 - [Desktop Helpers](apps/desktop-helpers/README.md): نمایش فایل‌های مخفی، Maximize/Restore زیر ماوس و Middle Paste.
 - [PotPlayer](apps/potplayer/README.md): کپی یا حذف فایل در حال پخش.
