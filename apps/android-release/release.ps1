@@ -12,6 +12,39 @@ function Write-Step {
     Write-Host "==> $Message" -ForegroundColor Cyan
 }
 
+function Show-ReleaseNotification {
+    param(
+        [string]$ReleaseVersion,
+        [string]$ApkPath
+    )
+
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        Add-Type -AssemblyName System.Drawing
+
+        $notification = New-Object System.Windows.Forms.NotifyIcon
+        try {
+            $notification.Icon = [System.Drawing.SystemIcons]::Information
+            $notification.BalloonTipIcon = [System.Windows.Forms.ToolTipIcon]::Info
+            $notification.BalloonTipTitle = "Release $ReleaseVersion completed"
+            $notification.BalloonTipText = "APK created: $(Split-Path -Leaf $ApkPath)`n$ApkPath"
+            $notification.Visible = $true
+            $notification.ShowBalloonTip(5000)
+
+            # NotifyIcon must remain alive briefly or Windows removes the banner.
+            Start-Sleep -Milliseconds 5200
+        }
+        finally {
+            $notification.Visible = $false
+            $notification.Dispose()
+        }
+    }
+    catch {
+        # Notification failure must not turn a completed release into a failure.
+        Write-Warning "Release completed, but the Windows notification could not be shown: $($_.Exception.Message)"
+    }
+}
+
 function Invoke-Checked {
     param(
         [Parameter(Mandatory = $true)][string]$Command,
@@ -404,6 +437,7 @@ try {
     Write-Host "APK: $destinationPath" -ForegroundColor Green
     Write-Host "Commit: version: $Version" -ForegroundColor Green
     Write-Host "Tag: $Version" -ForegroundColor Green
+    Show-ReleaseNotification -ReleaseVersion $Version -ApkPath $destinationPath
 }
 catch {
     if (-not $commitCreated) {
