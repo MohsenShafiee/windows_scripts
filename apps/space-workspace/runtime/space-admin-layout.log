@@ -187,3 +187,7 @@
 2026-08-14 17:06:09 Started elevated Terminal.
 2026-08-14 17:06:09 Started elevated Windows Command Center.
 2026-08-14 17:06:56 All eight windows are present and stable in the expected rectangles.
+2026-08-15 13:19:50 Layout helper started. NoLaunch=False; ArrangeOnce=False
+2026-08-15 13:19:51 Started elevated Terminal.
+2026-08-15 13:19:52 Started elevated Windows Command Center.
+2026-08-15 13:20:35 All eight windows are present and stable in the expected rectangles.
