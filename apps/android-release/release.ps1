@@ -252,13 +252,9 @@ function Set-AndroidVersion {
     return $newCode
 }
 
-function Get-AndroidAppName {
-    param(
-        [string]$ProjectRoot,
-        [string]$BuildFile
-    )
+function Get-AndroidManifestLabel {
+    param([string]$ModuleRoot)
 
-    $moduleRoot = Split-Path -Parent $BuildFile
     $manifestPath = Join-Path $moduleRoot 'src\main\AndroidManifest.xml'
     if (Test-Path -LiteralPath $manifestPath) {
         try {
@@ -266,9 +262,9 @@ function Get-AndroidAppName {
             $label = $manifest.manifest.application.GetAttribute('label', 'http://schemas.android.com/apk/res/android')
             if (-not [string]::IsNullOrWhiteSpace($label)) {
                 $resourceMatch = [regex]::Match($label, '^@string/(?<key>.+)$')
-                if (-not $resourceMatch.Success) { return $label }
+                if (-not $resourceMatch.Success -and $label -notmatch '^\$\{.+\}$') { return $label.Trim() }
                 $stringsPath = Join-Path $moduleRoot 'src\main\res\values\strings.xml'
-                if (Test-Path -LiteralPath $stringsPath) {
+                if ($resourceMatch.Success -and (Test-Path -LiteralPath $stringsPath)) {
                     [xml]$strings = [IO.File]::ReadAllText($stringsPath)
                     $key = $resourceMatch.Groups['key'].Value
                     $stringNode = @($strings.resources.string | Where-Object { $_.name -eq $key }) | Select-Object -First 1
@@ -282,6 +278,53 @@ function Get-AndroidAppName {
             Write-Warning "Could not read the Android app label: $($_.Exception.Message)"
         }
     }
+
+    return $null
+}
+
+function Get-FlutterAppName {
+    param(
+        [string]$ProjectRoot,
+        [string]$FallbackName
+    )
+
+    $androidLabel = Get-AndroidManifestLabel -ModuleRoot (Join-Path $ProjectRoot 'android\app')
+    if (-not [string]::IsNullOrWhiteSpace($androidLabel)) { return $androidLabel }
+
+    $infoPlistPath = Join-Path $ProjectRoot 'ios\Runner\Info.plist'
+    if (Test-Path -LiteralPath $infoPlistPath) {
+        try {
+            $infoPlistText = [IO.File]::ReadAllText($infoPlistPath)
+            foreach ($key in @('CFBundleDisplayName', 'CFBundleName')) {
+                $nameMatch = [regex]::Match(
+                    $infoPlistText,
+                    "(?s)<key>\s*$key\s*</key>\s*<string>\s*(?<name>[^<]+?)\s*</string>"
+                )
+                if ($nameMatch.Success) {
+                    $name = [Net.WebUtility]::HtmlDecode($nameMatch.Groups['name'].Value).Trim()
+                    if (-not [string]::IsNullOrWhiteSpace($name) -and $name -notmatch '^\$\(.+\)$') {
+                        return $name
+                    }
+                }
+            }
+        }
+        catch {
+            Write-Warning "Could not read the iOS app name: $($_.Exception.Message)"
+        }
+    }
+
+    return $FallbackName
+}
+
+function Get-AndroidAppName {
+    param(
+        [string]$ProjectRoot,
+        [string]$BuildFile
+    )
+
+    $moduleRoot = Split-Path -Parent $BuildFile
+    $manifestLabel = Get-AndroidManifestLabel -ModuleRoot $moduleRoot
+    if (-not [string]::IsNullOrWhiteSpace($manifestLabel)) { return $manifestLabel }
 
     foreach ($settingsName in @('settings.gradle', 'settings.gradle.kts')) {
         $settingsPath = Join-Path $ProjectRoot $settingsName
@@ -365,7 +408,7 @@ try {
         if ($null -eq $flutterCommand) { throw 'Flutter was not found in PATH.' }
 
         $metadata = Set-FlutterVersion -PubspecPath $versionFile -NewVersion $Version
-        $appName = $metadata.Name
+        $appName = Get-FlutterAppName -ProjectRoot $projectRoot -FallbackName $metadata.Name
         Write-Step "Updated pubspec.yaml: version $Version+$($metadata.VersionCode)"
         Write-Step 'Building Flutter release APK'
         Push-Location $projectRoot

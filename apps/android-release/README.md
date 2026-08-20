@@ -88,7 +88,7 @@ git push origin 1.0.1
 
 ## نام برنامه
 
-- Flutter: مقدار `name` در `pubspec.yaml`
+- Flutter: ابتدا `android:label` در Manifest یا مقدار متناظر `@string/app_name`، سپس `CFBundleDisplayName`/`CFBundleName` در iOS، و در نهایت مقدار `name` در `pubspec.yaml`
 - Android: ابتدا `android:label` در Manifest و مقدار متناظر در `strings.xml`؛ در صورت نبودن آن، `rootProject.name` یا نام پوشهٔ پروژه
 
 کاراکترهای غیرمجاز نام فایل ویندوز به `_` تبدیل می‌شوند.
