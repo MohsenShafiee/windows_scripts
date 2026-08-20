@@ -106,7 +106,7 @@ function Find-Project {
         $pubspecPath = Join-Path $directory.FullName 'pubspec.yaml'
         if (Test-Path -LiteralPath $pubspecPath) {
             $pubspecText = [IO.File]::ReadAllText($pubspecPath)
-            if ($pubspecText -match '(?m)^[ \t]*flutter[ \t]*:[ \t]*(?:#.*)?$') {
+            if ($pubspecText -match '(?m)^[ \t]*flutter[ \t]*:[ \t]*(?:#[^\r\n]*)?\r?$') {
                 return [PSCustomObject]@{ Type = 'Flutter'; Root = $directory.FullName; VersionFile = $pubspecPath }
             }
         }
@@ -171,10 +171,10 @@ function Get-FlutterMetadata {
     param([string]$PubspecPath)
 
     $text = [IO.File]::ReadAllText($PubspecPath)
-    $nameMatch = [regex]::Match($text, '(?m)^name[ \t]*:[ \t]*["'']?(?<name>[^#\r\n"'']+)["'']?[ \t]*(?:#.*)?$')
+    $nameMatch = [regex]::Match($text, '(?m)^name[ \t]*:[ \t]*["'']?(?<name>[^#\r\n"'']+)["'']?[ \t]*(?:#[^\r\n]*)?\r?$')
     if (-not $nameMatch.Success) { throw 'The app name could not be read from pubspec.yaml.' }
 
-    $versionMatch = [regex]::Match($text, '(?m)^version[ \t]*:[ \t]*(?<value>[^#\r\n]+?)[ \t]*(?<comment>#.*)?$')
+    $versionMatch = [regex]::Match($text, '(?m)^version[ \t]*:[ \t]*(?<value>[^#\r\n]+?)[ \t]*(?<comment>#[^\r\n]*)?\r?$')
     $currentCode = 0
     if ($versionMatch.Success) {
         $currentValue = $versionMatch.Groups['value'].Value.Trim()

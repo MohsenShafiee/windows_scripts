@@ -82,7 +82,7 @@ git push origin 1.0.1
 - Git working tree باید قبل از اجرا کاملاً clean باشد؛ تغییرات موجود را commit یا stash کنید.
 - اگر تگ نسخه از قبل وجود داشته باشد، عملیات شروع نمی‌شود.
 - اگر build یا مرحله‌ای پیش از commit شکست بخورد، فایل نسخه و APK مقصد به حالت قبلی برمی‌گردند.
-- فایل‌های Gradle با line ending ویندوزی CRLF و یونیکسی LF هر دو پشتیبانی می‌شوند.
+- فایل‌های `pubspec.yaml` و Gradle با line ending ویندوزی CRLF و یونیکسی LF هر دو پشتیبانی می‌شوند.
 - برای Native Android باید دقیقاً یک application module قابل تشخیص وجود داشته باشد و `versionCode` یک عدد مستقیم باشد. تعریف مستقیم plugin و Gradle Version Catalog مانند `alias(libs.plugins.android.application)` پشتیبانی می‌شوند.
 - اگر چند APK خروجی ساخته شود، ابزار فایل Release اصلی و جدیدتر را انتخاب و هشدار چاپ می‌کند.
 
