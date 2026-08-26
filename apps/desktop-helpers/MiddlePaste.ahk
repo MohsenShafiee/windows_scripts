@@ -37,12 +37,43 @@ $MButton::{
         || cls = "ConsoleWindowClass"
         || cls = "CASCADIA_HOSTING_WINDOW_CLASS"
 
-    if (A_Cursor = "IBeam" || isTerminal) {
-        Click "Left"
-        Sleep 120
+    isBrowser :=
+        proc = "chrome.exe"
+        || proc = "msedge.exe"
+        || proc = "firefox.exe"
+        || proc = "brave.exe"
+        || proc = "opera.exe"
+        || proc = "vivaldi.exe"
+
+    ; A selected hyperlink often leaves a Hand/Arrow cursor, so A_Cursor alone
+    ; cannot identify it as selected text. Probe the browser selection while
+    ; preserving every clipboard format, then paste only when text was copied.
+    browserHasSelection := isBrowser
+        && WinActive("ahk_id " winId)
+        && HasSelectedText()
+
+    if (A_Cursor = "IBeam" || isTerminal || browserHasSelection) {
+        ; A left click collapses an existing text/link selection before paste.
+        ; Keep the current selection and only activate the target window when
+        ; it is not already active.
+        if !WinActive("ahk_id " winId) {
+            WinActivate "ahk_id " winId
+            if !WinWaitActive("ahk_id " winId, , 0.5)
+                return
+        }
         Send "^v"
     } else {
         Send "{MButton}"
     }
 }
 #HotIf
+
+HasSelectedText() {
+    savedClipboard := ClipboardAll()
+    A_Clipboard := ""
+    Send "^c"
+    hasText := ClipWait(0.2) && A_Clipboard != ""
+    A_Clipboard := savedClipboard
+    Sleep 30
+    return hasText
+}
